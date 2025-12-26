@@ -16,5 +16,8 @@
   },
   "1.0.5": {
     "en": "fix: handle Buffer format for zoneStatus and add missing cluster"
+  },
+  "1.0.6": {
+    "en": "fix: improve IAS Zone enrollment for Tuya devices"
   }
 }
