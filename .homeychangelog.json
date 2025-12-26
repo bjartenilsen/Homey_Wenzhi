@@ -10,5 +10,8 @@
   },
   "1.0.3": {
     "en": "fix: use onNodeInit instead of onInit for zclNode access"
+  },
+  "1.0.4": {
+    "en": "fix: read initial zone status on device init"
   }
 }
