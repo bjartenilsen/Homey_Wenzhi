@@ -58,5 +58,58 @@
       }
     }
   ],
-  "flow": {}
+  "flow": {
+    "triggers": [
+      {
+        "id": "motion_detected",
+        "title": {
+          "en": "Motion detected"
+        },
+        "hint": {
+          "en": "When the sensor detects presence"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=mtd085zb"
+          }
+        ]
+      },
+      {
+        "id": "motion_cleared",
+        "title": {
+          "en": "Motion cleared"
+        },
+        "hint": {
+          "en": "When the sensor no longer detects presence"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=mtd085zb"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "is_motion_detected",
+        "title": {
+          "en": "Motion !{{is|is not}} detected"
+        },
+        "hint": {
+          "en": "Check if the sensor currently detects presence"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=mtd085zb"
+          }
+        ]
+      }
+    ]
+  }
 }

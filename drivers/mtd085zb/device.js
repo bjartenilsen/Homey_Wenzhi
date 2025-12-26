@@ -3,6 +3,7 @@
 const { ZigBeeDevice } = require('homey-zigbeedriver');
 const { isPresenceDetected } = require('../../lib/zone-status-parser');
 const { withRetry } = require('../../lib/retry');
+const { determineFlowTrigger } = require('../../lib/flow-trigger-logic');
 
 /**
  * MTD085-ZB Presence Sensor Device
@@ -36,7 +37,21 @@ class MTD085ZBDevice extends ZigBeeDevice {
     // Register IAS Zone cluster for zone status change notifications
     this.registerIASZoneHandler();
 
+    // Register flow condition handler
+    this.registerFlowConditions();
+
     this.log('MTD085-ZB device initialized');
+  }
+
+  /**
+   * Registers flow condition handlers
+   */
+  registerFlowConditions() {
+    this.homey.flow.getConditionCard('is_motion_detected')
+      .registerRunListener(async (args) => {
+        return args.device.getCapabilityValue('alarm_motion') === true;
+      });
+    this.log('Flow condition handlers registered');
   }
 
   /**
@@ -96,16 +111,16 @@ class MTD085ZBDevice extends ZigBeeDevice {
     const presenceDetected = isPresenceDetected(zoneStatus);
     const currentState = this.getCapabilityValue('alarm_motion');
 
-    if (presenceDetected !== currentState) {
+    // Determine which flow card to trigger based on state transition
+    const triggerType = determineFlowTrigger(currentState, presenceDetected);
+
+    if (triggerType !== null) {
       await this.setCapabilityValue('alarm_motion', presenceDetected);
       this.log('Motion alarm updated:', presenceDetected);
 
       // Trigger appropriate flow card
-      if (presenceDetected) {
-        await this.homey.flow.getDeviceTriggerCard('motion_detected').trigger(this);
-      } else {
-        await this.homey.flow.getDeviceTriggerCard('motion_cleared').trigger(this);
-      }
+      await this.homey.flow.getDeviceTriggerCard(triggerType).trigger(this);
+      this.log('Flow card triggered:', triggerType);
     }
   }
 
