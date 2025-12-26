@@ -167,8 +167,26 @@ class MTD085ZBDevice extends ZigBeeDevice {
     const iasZoneCluster = this.zclNode.endpoints[1].clusters.iasZone;
     
     if (iasZoneCluster) {
+      // Register zone status change notification handler
       iasZoneCluster.onZoneStatusChangeNotification = this.onZoneStatusChange.bind(this);
-      this.log('IAS Zone handler registered');
+      this.log('IAS Zone status change handler registered');
+
+      // Register zone enroll request handler - device will send this after CIE address is written
+      iasZoneCluster.onZoneEnrollRequest = async (payload) => {
+        this.log('Zone enroll request received:', payload);
+        try {
+          // Respond with enrollment success
+          await iasZoneCluster.zoneEnrollResponse({
+            enrollResponseCode: 0, // Success
+            zoneId: 1,
+          });
+          this.log('Zone enroll response sent');
+          await this.setStoreValue('iasZoneEnrolled', true);
+        } catch (error) {
+          this.error('Failed to send zone enroll response:', error.message);
+        }
+      };
+      this.log('IAS Zone enroll request handler registered');
     } else {
       this.error('IAS Zone cluster not found on endpoint 1');
     }
@@ -230,8 +248,7 @@ class MTD085ZBDevice extends ZigBeeDevice {
   /**
    * Configures the IAS Zone cluster
    * - Writes CIE address
-   * - Sends zone enroll response
-   * - Configures attribute reporting
+   * - Waits for device to send zone enroll request (handled by onZoneEnrollRequest)
    * 
    * @returns {Promise<void>}
    */
@@ -242,31 +259,39 @@ class MTD085ZBDevice extends ZigBeeDevice {
       throw new Error('IAS Zone cluster not available');
     }
 
-    // Write CIE address (Homey's IEEE address)
-    this.log('Writing CIE address...');
+    // Check current zone state
+    const { zoneState } = await iasZoneCluster.readAttributes(['zoneState']);
+    this.log('Current zone state:', zoneState);
+
+    if (zoneState === 'enrolled') {
+      this.log('Device already enrolled');
+      await this.setStoreValue('iasZoneEnrolled', true);
+      return;
+    }
+
+    // Write CIE address (Homey's IEEE address) - this triggers the device to send zoneEnrollRequest
+    this.log('Writing CIE address to trigger enrollment...');
     await iasZoneCluster.writeAttributes({
       iasCieAddress: this.homey.zigbee.ieeeAddress,
     });
+    this.log('CIE address written, waiting for zone enroll request from device...');
 
-    // Send zone enroll response
-    this.log('Sending zone enroll response...');
-    await iasZoneCluster.zoneEnrollResponse({
-      enrollResponseCode: 0, // Success
-      zoneId: 1,
-    });
-
-    // Configure attribute reporting for zone status
-    this.log('Configuring zone status reporting...');
-    await iasZoneCluster.configureReporting({
-      zoneStatus: {
-        minInterval: 0,
-        maxInterval: 3600,
-        minChange: 1,
-      },
-    });
+    // For some Tuya devices, we need to send the enroll response proactively
+    // Wait a bit then send enroll response
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    try {
+      this.log('Sending proactive zone enroll response...');
+      await iasZoneCluster.zoneEnrollResponse({
+        enrollResponseCode: 0, // Success
+        zoneId: 1,
+      });
+      this.log('Zone enroll response sent');
+    } catch (error) {
+      this.log('Proactive enroll response failed (may be normal):', error.message);
+    }
 
     // Store configuration state
-    await this.setStoreValue('iasZoneEnrolled', true);
     await this.setStoreValue('cieAddressConfigured', true);
   }
 }
