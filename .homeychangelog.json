@@ -13,5 +13,8 @@
   },
   "1.0.4": {
     "en": "fix: read initial zone status on device init"
+  },
+  "1.0.5": {
+    "en": "fix: handle Buffer format for zoneStatus and add missing cluster"
   }
 }
