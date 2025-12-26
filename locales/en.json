@@ -1,0 +1,24 @@
+{
+  "app": {
+    "name": "Wenzhi MTD085-ZB Presence Sensor",
+    "description": "Support for the Wenzhi/LeapMMW MTD085-ZB mmWave presence sensor"
+  },
+  "device": {
+    "name": "MTD085-ZB Presence Sensor"
+  },
+  "flow": {
+    "triggers": {
+      "motion_detected": {
+        "title": "Motion detected"
+      },
+      "motion_cleared": {
+        "title": "Motion cleared"
+      }
+    },
+    "conditions": {
+      "is_motion_detected": {
+        "title": "Motion is detected"
+      }
+    }
+  }
+}
