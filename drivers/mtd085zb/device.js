@@ -43,6 +43,9 @@ class MTD085ZBDevice extends ZigBeeDevice {
     // Register flow condition handler
     this.registerFlowConditions();
 
+    // Read initial zone status
+    await this.readCurrentZoneStatus();
+
     this.log('MTD085-ZB device initialized');
   }
 
