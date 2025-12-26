@@ -83,6 +83,67 @@ class MTD085ZBDevice extends ZigBeeDevice {
   }
 
   /**
+   * Called when the device goes offline
+   * Sets the device as unavailable in the Homey interface
+   * 
+   * @returns {Promise<void>}
+   */
+  async onOffline() {
+    this.log('MTD085-ZB device went offline');
+    await this.setUnavailable(this.homey.__('device.unavailable'));
+  }
+
+  /**
+   * Called when the device comes back online
+   * Restores availability and re-reads the current zone status
+   * 
+   * @returns {Promise<void>}
+   */
+  async onOnline() {
+    this.log('MTD085-ZB device came back online');
+    
+    // Restore device availability
+    await this.setAvailable();
+    this.log('Device availability restored');
+
+    // Re-read current zone status to sync state
+    await this.readCurrentZoneStatus();
+  }
+
+  /**
+   * Reads the current zone status from the device
+   * Used to sync state after reconnection
+   * 
+   * @returns {Promise<void>}
+   */
+  async readCurrentZoneStatus() {
+    try {
+      const iasZoneCluster = this.zclNode.endpoints[1].clusters.iasZone;
+      
+      if (!iasZoneCluster) {
+        this.error('IAS Zone cluster not available for status read');
+        return;
+      }
+
+      this.log('Reading current zone status...');
+      const { zoneStatus } = await iasZoneCluster.readAttributes(['zoneStatus']);
+      
+      this.log('Current zone status:', zoneStatus);
+      
+      // Update capability based on current status
+      const presenceDetected = isPresenceDetected(zoneStatus);
+      const currentState = this.getCapabilityValue('alarm_motion');
+      
+      if (currentState !== presenceDetected) {
+        await this.setCapabilityValue('alarm_motion', presenceDetected);
+        this.log('Motion alarm synced to:', presenceDetected);
+      }
+    } catch (error) {
+      this.error('Failed to read zone status:', error.message);
+    }
+  }
+
+  /**
    * Registers the IAS Zone cluster handler for zone status change notifications
    */
   registerIASZoneHandler() {
