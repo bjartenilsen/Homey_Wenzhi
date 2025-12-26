@@ -37,6 +37,17 @@ class MTD085ZBDevice extends ZigBeeDevice {
     // Store zclNode reference
     this.zclNode = zclNode;
 
+    // Configure IAS Zone if not already done
+    const isEnrolled = this.getStoreValue('iasZoneEnrolled');
+    if (!isEnrolled) {
+      this.log('IAS Zone not enrolled, configuring...');
+      try {
+        await this.configureIASZoneWithRetry();
+      } catch (error) {
+        this.error('Failed to configure IAS Zone:', error.message);
+      }
+    }
+
     // Register IAS Zone cluster for zone status change notifications
     this.registerIASZoneHandler();
 
