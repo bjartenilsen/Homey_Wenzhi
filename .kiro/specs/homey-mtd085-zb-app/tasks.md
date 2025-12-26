@@ -110,43 +110,84 @@
     - **Property 4: Configuration Retry Logic**
     - **Validates: Requirements 4.4**
 
-- [ ] 4. Implement flow cards
-  - [ ] 4.1 Define flow cards in app.json
+- [x] 4. Implement flow cards
+
+
+
+
+
+  - [x] 4.1 Define flow cards in app.json
+
+
     - Add trigger cards: motion_detected, motion_cleared
     - Add condition card: is_motion_detected
     - _Requirements: 3.1, 3.2, 3.3_
-  - [ ] 4.2 Implement flow card triggers in device driver
+  - [x] 4.2 Implement flow card triggers in device driver
+
+
     - Trigger motion_detected when alarm_motion changes to true
     - Trigger motion_cleared when alarm_motion changes to false
     - _Requirements: 3.1, 3.2_
-  - [ ] 4.3 Implement flow condition handler
+  - [x] 4.3 Implement flow condition handler
+
+
     - Return current alarm_motion state for condition check
     - _Requirements: 3.3_
-  - [ ] 4.4 Write property test for flow card triggering
+  - [x] 4.4 Write property test for flow card triggering
+
+
     - **Property 3: Flow Card Triggering on State Change**
     - **Validates: Requirements 3.1, 3.2**
 
-- [ ] 5. Implement device availability handling
-  - [ ] 5.1 Handle device offline/online events
+- [x] 5. Implement device availability handling
+
+
+
+
+
+
+  - [x] 5.1 Handle device offline/online events
+
     - Set device unavailable when offline detected
     - Re-read zone status on reconnection
     - Restore availability on reconnection
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
 
-- [ ] 6. Checkpoint - Ensure all tests pass
+
+- [x] 6. Checkpoint - Ensure all tests pass
+
+
+
+
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. Create driver entry point
-  - [ ] 7.1 Create driver.js file
+- [x] 7. Create driver entry point
+
+
+
+
+
+
+  - [x] 7.1 Create driver.js file
+
     - Create drivers/mtd085zb/driver.js extending ZigBeeDriver
     - Wire up device class
     - _Requirements: 6.2_
 
-- [ ] 8. Final validation
-  - [ ] 8.1 Validate complete app structure
+
+- [x] 8. Final validation
+
+
+
+
+
+
+  - [x] 8.1 Validate complete app structure
+
     - Verify all required files exist
     - Run homey app validate command
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
+
 
 - [ ] 9. Final Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
