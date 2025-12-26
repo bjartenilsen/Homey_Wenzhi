@@ -26,13 +26,16 @@ class MTD085ZBDevice extends ZigBeeDevice {
   static RETRY_DELAY = 1000;
 
   /**
-   * Called when the device is initialized
+   * Called when the Zigbee node is initialized and zclNode is available
    * Sets up IAS Zone cluster handling and configures the device
    * 
    * @returns {Promise<void>}
    */
-  async onInit() {
+  async onNodeInit({ zclNode }) {
     this.log('MTD085-ZB device initializing...');
+
+    // Store zclNode reference
+    this.zclNode = zclNode;
 
     // Register IAS Zone cluster for zone status change notifications
     this.registerIASZoneHandler();
