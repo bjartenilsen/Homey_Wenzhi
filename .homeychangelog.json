@@ -19,5 +19,8 @@
   },
   "1.0.6": {
     "en": "fix: improve IAS Zone enrollment for Tuya devices"
+  },
+  "1.0.7": {
+    "en": "Add debug logs"
   }
 }
