@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "Wenzhi MTD085-ZB Presence Sensor",
-    "description": "Support for the Wenzhi/LeapMMW MTD085-ZB mmWave presence sensor"
+    "name": "Wenzhi",
+    "description": "Support for Wenzhi smart home devices"
   },
   "device": {
     "name": "MTD085-ZB Presence Sensor",

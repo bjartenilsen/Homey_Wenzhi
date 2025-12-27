@@ -5,10 +5,10 @@
   "sdk": 3,
   "brandColor": "#4A90D9",
   "name": {
-    "en": "Wenzhi MTD085-ZB Presence Sensor"
+    "en": "Wenzhi"
   },
   "description": {
-    "en": "Support for the Wenzhi/LeapMMW MTD085-ZB mmWave presence sensor"
+    "en": "Support for Wenzhi smart home devices"
   },
   "category": [
     "security"

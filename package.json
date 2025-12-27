@@ -1,7 +1,7 @@
 {
   "name": "com.wenzhi.mtd085zb",
   "version": "1.0.0",
-  "description": "Homey app for Wenzhi MTD085-ZB mmWave presence sensor",
+  "description": "Homey app for Wenzhi smart home devices",
   "main": "app.js",
   "scripts": {
     "test": "vitest --run",
