@@ -22,5 +22,8 @@
   },
   "1.0.7": {
     "en": "Add debug logs"
+  },
+  "1.0.8": {
+    "en": "Cleaned up debug logs. Renamed app."
   }
 }
