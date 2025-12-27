@@ -76,6 +76,35 @@ class MTD085ZBDevice extends ZigBeeDevice {
   }
 
   /**
+   * Sets up attribute reporting for zone status changes
+   */
+  async setupAttributeReporting() {
+    try {
+      const iasZoneCluster = this.zclNode.endpoints[1].clusters.iasZone;
+      
+      if (!iasZoneCluster) {
+        this.log('No IAS Zone cluster for attribute reporting setup');
+        return;
+      }
+
+      this.log('Setting up attribute reporting for zone status...');
+      
+      // Configure reporting for zone status attribute
+      await iasZoneCluster.configureReporting({
+        zoneStatus: {
+          minInterval: 1,     // Minimum 1 second
+          maxInterval: 300,   // Maximum 5 minutes
+          minChange: 1,       // Report any change
+        },
+      });
+      
+      this.log('Zone status attribute reporting configured');
+    } catch (error) {
+      this.log('Failed to configure attribute reporting (may be normal for some devices):', error.message);
+    }
+  }
+
+  /**
    * Called when the device is added to Homey
    * Configures the IAS Zone cluster with retry logic
    * 
