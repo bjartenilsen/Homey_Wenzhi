@@ -299,10 +299,10 @@ class MTD085ZBDevice extends ZigBeeDevice {
     this.log('Writing CIE address to trigger enrollment...');
     this.debugNotify('Writing CIE address...');
     await iasZoneCluster.writeAttributes({
-      iasCieAddress: this.homey.zigbee.ieeeAddress,
+      cieAddr: this.homey.zigbee.ieeeAddress,
     });
-    this.log('CIE address written, waiting for zone enroll request from device...');
-    this.debugNotify('CIE address written');
+    this.log('CIE address written successfully, waiting for zone enroll request from device...');
+    this.debugNotify('CIE address written successfully');
 
     // For some Tuya devices, we need to send the enroll response proactively
     // Wait a bit then send enroll response
