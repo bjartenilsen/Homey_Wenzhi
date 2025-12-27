@@ -26,6 +26,20 @@ class MTD085ZBDevice extends ZigBeeDevice {
   static RETRY_DELAY = 1000;
 
   /**
+   * Sends debug notification to Homey timeline
+   * @param {string} message - Debug message
+   */
+  debugNotify(message) {
+    try {
+      this.homey.notifications.createNotification({
+        excerpt: `MTD085-ZB Debug: ${message}`
+      });
+    } catch (error) {
+      // Ignore notification errors
+    }
+  }
+
+  /**
    * Called when the Zigbee node is initialized and zclNode is available
    * Sets up IAS Zone cluster handling and configures the device
    * 
@@ -33,18 +47,24 @@ class MTD085ZBDevice extends ZigBeeDevice {
    */
   async onNodeInit({ zclNode }) {
     this.log('MTD085-ZB device initializing...');
+    this.debugNotify('Device initializing...');
 
     // Store zclNode reference
     this.zclNode = zclNode;
 
     // Configure IAS Zone if not already done
     const isEnrolled = this.getStoreValue('iasZoneEnrolled');
+    this.debugNotify(`IAS Zone enrolled: ${isEnrolled}`);
+    
     if (!isEnrolled) {
       this.log('IAS Zone not enrolled, configuring...');
+      this.debugNotify('Starting IAS Zone configuration...');
       try {
         await this.configureIASZoneWithRetry();
+        this.debugNotify('IAS Zone configuration completed');
       } catch (error) {
         this.error('Failed to configure IAS Zone:', error.message);
+        this.debugNotify(`IAS Zone config failed: ${error.message}`);
       }
     }
 
@@ -58,6 +78,7 @@ class MTD085ZBDevice extends ZigBeeDevice {
     await this.readCurrentZoneStatus();
 
     this.log('MTD085-ZB device initialized');
+    this.debugNotify('Device initialization complete');
   }
 
   /**
@@ -203,9 +224,11 @@ class MTD085ZBDevice extends ZigBeeDevice {
   async onZoneStatusChange(payload) {
     const { zoneStatus } = payload;
     this.log('Zone status change received:', zoneStatus);
+    this.debugNotify(`Zone status change: ${JSON.stringify(zoneStatus)}`);
 
     const presenceDetected = isPresenceDetected(zoneStatus);
     const currentState = this.getCapabilityValue('alarm_motion');
+    this.debugNotify(`Presence: ${presenceDetected}, Current: ${currentState}`);
 
     // Determine which flow card to trigger based on state transition
     const triggerType = determineFlowTrigger(currentState, presenceDetected);
@@ -213,6 +236,7 @@ class MTD085ZBDevice extends ZigBeeDevice {
     if (triggerType !== null) {
       await this.setCapabilityValue('alarm_motion', presenceDetected);
       this.log('Motion alarm updated:', presenceDetected);
+      this.debugNotify(`Motion updated: ${presenceDetected}, Trigger: ${triggerType}`);
 
       // Trigger appropriate flow card
       await this.homey.flow.getDeviceTriggerCard(triggerType).trigger(this);
@@ -262,19 +286,23 @@ class MTD085ZBDevice extends ZigBeeDevice {
     // Check current zone state
     const { zoneState } = await iasZoneCluster.readAttributes(['zoneState']);
     this.log('Current zone state:', zoneState);
+    this.debugNotify(`Zone state: ${zoneState}`);
 
     if (zoneState === 'enrolled') {
       this.log('Device already enrolled');
+      this.debugNotify('Device already enrolled');
       await this.setStoreValue('iasZoneEnrolled', true);
       return;
     }
 
     // Write CIE address (Homey's IEEE address) - this triggers the device to send zoneEnrollRequest
     this.log('Writing CIE address to trigger enrollment...');
+    this.debugNotify('Writing CIE address...');
     await iasZoneCluster.writeAttributes({
       iasCieAddress: this.homey.zigbee.ieeeAddress,
     });
     this.log('CIE address written, waiting for zone enroll request from device...');
+    this.debugNotify('CIE address written');
 
     // For some Tuya devices, we need to send the enroll response proactively
     // Wait a bit then send enroll response
@@ -282,13 +310,16 @@ class MTD085ZBDevice extends ZigBeeDevice {
     
     try {
       this.log('Sending proactive zone enroll response...');
+      this.debugNotify('Sending enroll response...');
       await iasZoneCluster.zoneEnrollResponse({
         enrollResponseCode: 0, // Success
         zoneId: 1,
       });
       this.log('Zone enroll response sent');
+      this.debugNotify('Enroll response sent');
     } catch (error) {
       this.log('Proactive enroll response failed (may be normal):', error.message);
+      this.debugNotify(`Enroll response failed: ${error.message}`);
     }
 
     // Store configuration state
